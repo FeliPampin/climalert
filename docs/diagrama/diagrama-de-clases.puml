@@ -27,13 +27,13 @@ class ClimaDataInMemoryImpl implements ClimaDataRepository{
 
 'Integraciones Externas (Adapter)
 interface ClimaProvider <<Adapter>> {
-    + obtenerClimaActual(String: location): ClimaData
+    + obtenerClimaActual(String: ubicacion): ClimaData
 }
 
 class WeatherApiAdapter <<Component>> implements ClimaProvider {
     - restTemplate: RestTemplate
     - apiUrl: String
-    + obtenerClimaActual(String: location): ClimaData
+    + obtenerClimaActual(String: ubicacion): ClimaData
 }
 
 
