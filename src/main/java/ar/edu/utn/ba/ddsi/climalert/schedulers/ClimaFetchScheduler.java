@@ -10,8 +10,14 @@ import org.springframework.beans.factory.annotation.Value;
 public class ClimaFetchScheduler {
     private ClimaProvider climaProvider;
     private ClimaDataRepository climaDataRepository;
-    @Value("${climalert.ubicacion}")
     private String ubicacion;
+
+    public ClimaFetchScheduler(ClimaProvider climaProvider, ClimaDataRepository climaDataRepository, @Value("${climalert.ubicacion:CABA}") String ubicacion) {
+
+        this.climaProvider = climaProvider;
+        this.climaDataRepository = climaDataRepository;
+        this.ubicacion = ubicacion;
+    }
 
     @Scheduled(cron = "0 0/5 * * * *")
     public void obtenerYGuardar(){
