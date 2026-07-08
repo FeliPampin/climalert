@@ -1,0 +1,102 @@
+@startuml
+
+'Entidades de dominio
+class ClimaData {
+    - id: Long
+    - temperatura: double
+    - humedad: double
+    - timestamp: LocalDateTime
+    - ubicacion: String
+}
+
+class AlertaEvento {
+    - mensaje: String
+    - climaData: ClimaData
+}
+
+'Repository
+interface ClimaDataRepository <<Repository>> {
+    + save(ClimaData: data): ClimaData
+    + findUltimo(): ClimaData
+}
+
+class ClimaDataInMemoryImpl implements ClimaDataRepository{
+    + save(ClimaData: data): ClimaData
+    + findUltimo(): ClimaData
+}
+
+'Integraciones Externas (Adapter)
+interface ClimaProvider <<Adapter>> {
+    + obtenerClimaActual(String: location): ClimaData
+}
+
+class WeatherApiAdapter <<Component>> implements ClimaProvider {
+    - restTemplate: RestTemplate
+    - apiUrl: String
+    + obtenerClimaActual(String: location): ClimaData
+}
+
+
+'Schedulers
+class ClimaFetchScheduler <<Scheduler>> {
+    - climaProvider: ClimaProvider
+    - repository: ClimaDataRepository
+    - ubicacion: String
+    + @Scheduled(cron = "0 0/5 * * * *") obtenerYGuardar()
+}
+
+class AlertaAnalisisScheduler <<Scheduler>> {
+    - repository: ClimaDataRepository
+    - alertaService: AlertaService
+    + @Scheduled(cron = "0 * * * * *") analizarUltimaData()
+}
+
+'Strategy
+interface AlertaRegla <<Strategy>>{
+    + evaluar(ClimaData: data): boolean
+    + getAlertaMensaje(): String
+}
+
+class AltaTemperaturaYHumedadRegla <<Component>> implements AlertaRegla {
+    - maxTemp: double
+    - maxHum: double
+    + evaluar(ClimaData: data): boolean
+    + getAlertaMensaje(): String
+}
+
+class AlertaService <<Service>> {
+    - List<AlertaRegla> reglas
+    - ApplicationEventPublisher publicador
+    + analizar(ClimaData: data)
+}
+
+'Observer
+
+interface NotificacionStrategy <<Observer>> {
+    + enviar(AlertaEvento: evento)
+}
+
+class EmailNotificacionService <<Service>> implements NotificacionStrategy{
+    - mailSender: JavaMailSender
+    - receptores: List<String>
+    + @EventListener manejarAlerta(AlertaEvento: evento)
+    + enviar(AlertaEvento: evento)
+}
+
+
+'Relaciones y Dependencias
+ClimaFetchScheduler --> ClimaProvider
+ClimaFetchScheduler --> ClimaDataRepository
+
+AlertaAnalisisScheduler --> ClimaDataRepository
+AlertaAnalisisScheduler --> AlertaService
+
+AlertaService o--> AlertaRegla
+AlertaService ..> AlertaEvento
+
+EmailNotificacionService ..> AlertaEvento
+
+WeatherApiAdapter ..> ClimaData
+AlertaService ..> ClimaData
+
+@enduml
