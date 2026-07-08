@@ -20,6 +20,7 @@ public class WeatherAPIProvider implements ClimaProvider{
 
     @Override
     public ClimaData obtenerClimaActual(String ubicacion) {
+        restTemplate.
         return null;
     }
 }

@@ -2,6 +2,7 @@ package ar.edu.utn.ba.ddsi.climalert.observers;
 
 import ar.edu.utn.ba.ddsi.climalert.entidades.AlertaEvento;
 import org.springframework.context.event.EventListener;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,8 +12,8 @@ import java.util.List;
 
 @Service
 public class EmailNotificacionService implements NotificacionStrategy{
-    private JavaMailSender mailSender;
-    private List<String> receptores = new ArrayList<>();
+    private final JavaMailSender mailSender;
+    private List<String> receptores;
 
     public EmailNotificacionService(
             JavaMailSender mailSender,
@@ -24,7 +25,13 @@ public class EmailNotificacionService implements NotificacionStrategy{
 
     @Override
     public void enviar(AlertaEvento evento) {
-        //TODO: Desarrollar metodo
+        SimpleMailMessage mail = new SimpleMailMessage();
+        mail.setTo(receptores.toArray(new String[0]));
+        mail.setSubject("Climalert - Alerta Meteorológica Crítica");
+        mail.setText(evento.getMensaje());
+        mailSender.send(mail);
+
+        System.out.println("Correos de alerta enviados.");
     }
 
     @EventListener
