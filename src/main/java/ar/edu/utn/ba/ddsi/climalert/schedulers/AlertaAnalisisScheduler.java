@@ -17,7 +17,7 @@ public class AlertaAnalisisScheduler {
         this.alertaService = alertaService;
     }
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(fixedRateString = "${climalert.scheduler.analysis-rate:60000}")
     public void analizarUltimaData(){
         ClimaData ultimoClima = climaDataRepository.findUltimo();
         if(ultimoClima != null){

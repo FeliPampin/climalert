@@ -20,7 +20,7 @@ public class ClimaFetchScheduler {
         this.ubicacion = ubicacion;
     }
 
-    @Scheduled(cron = "0 0/5 * * * *")
+    @Scheduled(fixedRateString = "${climalert.scheduler.fetch-rate:300000}")
     public void obtenerYGuardar(){
         ClimaData climaActual = climaProvider.obtenerClimaActual(ubicacion);
         if (climaActual != null) {
